@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odoo Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body { margin:0; font-family:'Inter',sans-serif; height:100vh; overflow:hidden; display:flex; justify-content:center; align-items:center; perspective:1500px; background:linear-gradient(135deg,#4c1d95,#16a34a); background-size:400% 400%; animation:gradientShift 15s ease infinite; }
+@keyframes gradientShift { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+#particleCanvas { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; }
+.card-container { width:400px; height:650px; position:relative; transform-style:preserve-3d; transition:transform 1s; z-index:1; }
+.card-container.flipped { transform:rotateY(180deg); }
+.card { position:absolute; width:100%; height:100%; border-radius:20px; background:rgba(255,255,255,0.1); backdrop-filter:blur(25px); box-shadow:0 20px 60px rgba(0,0,0,0.2); color:#fff; padding:40px 30px; backface-visibility:hidden; display:flex; flex-direction:column; justify-content:center; border:1px solid rgba(255,255,255,0.2); }
+.card.back { transform:rotateY(180deg); }
+.branding { text-align:center; margin-bottom:30px; }
+.branding h1 { font-size:28px; font-weight:700; margin:0; color:#fff; text-shadow:0 0 10px rgba(0,0,0,0.2); }
+.input-group { position:relative; margin-bottom:20px; }
+.input-group input, .input-group select { width:100%; padding:14px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.25); outline:none; font-size:14px; background:rgba(0,0,0,0.3); color:#fff; transition:all 0.3s ease; appearance:none; }
+.input-group input:focus, .input-group select:focus { border-color:#fff; box-shadow:0 0 12px rgba(255,255,255,0.5); }
+.input-group label { position:absolute; top:14px; left:12px; font-size:14px; color:rgba(255,255,255,0.6); pointer-events:none; transition:all 0.2s ease; }
+.input-group input:focus + label, .input-group input:not(:placeholder-shown) + label, .input-group select:focus + label, .input-group select:valid + label { top:-8px; left:10px; font-size:12px; color:#fff; background:rgba(0,0,0,0.3); padding:0 4px; }
+.input-group select option { color:#000; background:#fff; }
+button { width:100%; padding:14px; border:none; border-radius:12px; font-weight:600; cursor:pointer; font-size:16px; color:#fff; background:linear-gradient(90deg,#16a34a,#4c1d95); box-shadow:0 0 25px rgba(22,163,52,0.5); transition:all 0.3s ease; margin-top:10px; }
+button:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 0 35px #16a34a, 0 0 40px #4c1d95; }
+.error { color:#f87171; font-size:13px; margin-bottom:10px; display:none; }
+.card a { display:block; color:#fff; font-weight:500; font-size:13px; text-decoration:none; margin-top:5px; transition:all 0.3s ease; }
+.card a:hover { text-decoration:underline; color:#16a34a; }
+#forgotPassword { position:absolute; top:50%; left:50%; width:350px; transform:translate(-50%, -50%); background:rgba(0,0,0,0.7); padding:30px; border-radius:16px; display:none; z-index:10; color:#fff; }
+#forgotPassword h2 { margin-top:0; margin-bottom:20px; text-align:center; }
+#forgotPassword input { width:100%; margin-bottom:15px; padding:12px; border-radius:10px; border:none; outline:none; font-size:14px; }
+#forgotPassword button { width:100%; padding:12px; border-radius:10px; border:none; cursor:pointer; font-size:14px; font-weight:600; background:linear-gradient(90deg,#16a34a,#4c1d95); color:#fff; }
+#forgotPassword .closeBtn { position:absolute; top:10px; right:15px; font-size:18px; cursor:pointer; color:#fff; }
+@media screen and (max-width:480px){ .card-container{ width:90%; height:auto; } .card{ padding:30px 20px; } #forgotPassword{ width:90%; } }
+</style>
+</head>
+<body>
+<canvas id="particleCanvas"></canvas>
+
+<div class="card-container" id="cardContainer">
+  <!-- Login Card -->
+  <div class="card front">
+    <div class="branding"><h1>Odoo Portal</h1></div>
+    <div class="input-group">
+      <input type="email" placeholder=" " id="login-email" required>
+      <label>Email</label>
+    </div>
+    <div class="input-group">
+      <input type="password" placeholder=" " id="login-password" required>
+      <label>Password</label>
+    </div>
+    <div class="error" id="loginError">Invalid email or password</div>
+    <button onclick="login()">Login</button>
+    <a href="#" onclick="showForgot()">Forgot password?</a>
+    <a href="#" onclick="flipCard()">Don't have an account? Sign Up</a>
+  </div>
+
+  <!-- Signup Card -->
+  <div class="card back">
+    <div class="branding"><h1>Create Account</h1></div>
+    <div class="input-group">
+      <input type="text" placeholder=" " id="signup-name" required>
+      <label>Full Name</label>
+    </div>
+    <div class="input-group">
+      <input type="email" placeholder=" " id="signup-email" required>
+      <label>Email</label>
+    </div>
+    <div class="input-group">
+      <input type="password" placeholder=" " id="signup-password" required>
+      <label>Password</label>
+    </div>
+    <div class="input-group">
+      <input type="password" placeholder=" " id="signup-repeat" required>
+      <label>Repeat Password</label>
+    </div>
+    <div class="input-group">
+      <select id="signup-country" required>
+        <option value="" disabled selected>Select your country</option>
+        <option value="USA">United States</option>
+        <option value="UK">United Kingdom</option>
+        <option value="Canada">Canada</option>
+        <option value="Germany">Germany</option>
+        <option value="India">India</option>
+        <option value="Australia">Australia</option>
+        <option value="France">France</option>
+        <option value="Other">Other</option>
+      </select>
+      <label>Country</label>
+    </div>
+    <div class="error" id="signupError">Passwords do not match or required fields missing</div>
+    <button onclick="validateSignup()">Sign Up</button>
+    <a href="#" onclick="flipCard()">Already have an account? Login</a>
+  </div>
+</div>
+
+<!-- Forgot Password Popup -->
+<div id="forgotPassword">
+  <span class="closeBtn" onclick="hideForgot()">×</span>
+  <h2>Reset Password</h2>
+  <input type="email" placeholder="Enter your email" id="forgot-email" required>
+  <button onclick="resetPassword()">Send Reset Link</button>
+</div>
+
+<script>
+// Flip card
+function flipCard() {
+  document.getElementById('cardContainer').classList.toggle('flipped');
+}
+
+// Validate Signup
+function validateSignup(){
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pass = document.getElementById('signup-password').value;
+  const repeat = document.getElementById('signup-repeat').value;
+  const country = document.getElementById('signup-country').value;
+  const error = document.getElementById('signupError');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if(!name || !email || !pass || !repeat || !country || !emailRegex.test(email) || pass!==repeat){
+    error.style.display='block';
+    return false;
+  }
+
+  error.style.display='none';
+  alert('Signed Up!');
+}
+
+// Login validation
+function login(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if(!emailRegex.test(email)){
+    alert('Enter a valid email');
+    return;
+  }
+  if(!pass){
+    alert('Enter password');
+    return;
+  }
+  alert('Logged In!');
+}
+
+// Forgot Password
+function showForgot(){ document.getElementById('forgotPassword').style.display='block'; }
+function hideForgot(){ document.getElementById('forgotPassword').style.display='none'; }
+function resetPassword(){
+  const email = document.getElementById('forgot-email').value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRegex.test(email)){
+    alert('Enter a valid email');
+    return;
+  }
+  alert(`If ${email} exists, a reset link has been sent!`);
+  hideForgot();
+}
+
+// Particle background
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+let particles=[];
+for(let i=0;i<120;i++){ particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,z:Math.random()*500,r:Math.random()*3+2,dx:(Math.random()-0.5)*1.5,dy:(Math.random()-0.5)*1.5}); }
+let mouse={x:canvas.width/2, y:canvas.height/2};
+document.addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let p of particles){
+    const scale=500/(500+p.z);
+    const dx=(p.x-mouse.x)/100;
+    const dy=(p.y-mouse.y)/100;
+    ctx.beginPath();
+    ctx.arc(p.x-dx,p.y-dy,p.r*scale,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.fill();
+    p.x+=p.dx*scale; p.y+=p.dy*scale; p.z-=0.5;
+    if(p.z<0) p.z=500;
+    if(p.x<0||p.x>canvas.width) p.dx*=-1;
+    if(p.y<0||p.y>canvas.height) p.dy*=-1;
+  }
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// Card tilt
+const cardContainer=document.getElementById('cardContainer');
+document.addEventListener('mousemove', e=>{
+  const x=(window.innerWidth/2 - e.clientX)/25;
+  const y=(window.innerHeight/2 - e.clientY)/25;
+  cardContainer.style.transform=`rotateY(${x}deg) rotateX(${y}deg) ${cardContainer.classList.contains('flipped')?'rotateY(180deg)':''}`;
+});
+</script>
+</body>
+</html>
