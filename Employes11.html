@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employees Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    /* Background Animation */
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #4c1d95, #16a34a);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      min-height: 100vh;
+      color: #fff;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Table Glass Effect */
+    .employee-table {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 15px 45px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+
+    .table-header {
+      background: rgba(255, 255, 255, 0.15);
+      color: #f9fafb;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .table-row:hover {
+      background: rgba(255,255,255,0.12);
+    }
+
+    /* Status / Role Pills */
+    .status-active {
+      background: rgba(34,197,94,0.25);
+      border: 1px solid rgba(34,197,94,0.6);
+      color: #bbf7d0;
+      font-weight: 600;
+    }
+    .status-inactive {
+      background: rgba(239,68,68,0.25);
+      border: 1px solid rgba(239,68,68,0.6);
+      color: #fecaca;
+      font-weight: 600;
+    }
+    .role-employee {
+      background: rgba(37,99,235,0.25);
+      border: 1px solid rgba(37,99,235,0.6);
+      color: #bfdbfe;
+      font-weight: 600;
+    }
+    .role-manager {
+      background: rgba(192,132,252,0.25);
+      border: 1px solid rgba(192,132,252,0.6);
+      color: #f3e8ff;
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn-edit { color: #38bdf8; font-weight: 600; }
+    .btn-edit:hover { color: #0ea5e9; text-decoration: underline; }
+    .btn-delete { color: #f87171; font-weight: 600; }
+    .btn-delete:hover { color: #ef4444; text-decoration: underline; }
+
+    .add-btn {
+      background: linear-gradient(90deg,#16a34a,#4c1d95);
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      box-shadow: 0 0 15px rgba(22,163,52,0.4);
+      transition: all 0.3s ease;
+    }
+    .add-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 0 20px #16a34a, 0 0 25px #4c1d95;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(5px);
+    }
+    .modal-content {
+      background: rgba(255,255,255,0.95);
+      color: #111;
+      margin: 8% auto;
+      padding: 25px;
+      border-radius: 12px;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+      animation: zoomIn 0.4s ease;
+    }
+    .close {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      color: #aaa;
+      cursor: pointer;
+    }
+    .close:hover { color: #111; }
+    .form-input {
+      width: 100%;
+      padding: 0.6rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ddd;
+      border-radius: 0.5rem;
+      font-size: 14px;
+    }
+    .form-btn {
+      background: linear-gradient(90deg,#16a34a,#4c1d95);
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .form-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body class="font-sans">
+
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 animate__animated animate__fadeInDown">Employees</h1>
+
+    <!-- Add Employee Button -->
+    <div class="flex justify-end mb-4">
+      <button class="add-btn animate__animated animate__pulse animate__infinite" id="openModal">
+        + Add Employee
+      </button>
+    </div>
+
+    <!-- Employee Table -->
+    <div class="employee-table animate__animated animate__fadeInUp">
+      <table class="min-w-full table-auto">
+        <thead class="table-header">
+          <tr>
+            <th class="px-4 py-2 text-left">Name</th>
+            <th class="px-4 py-2 text-left">Email</th>
+            <th class="px-4 py-2 text-left">Role</th>
+            <th class="px-4 py-2 text-left">Status</th>
+            <th class="px-4 py-2 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="employeeTableBody">
+          <!-- Example Row -->
+          <tr>
+            <td class="px-4 py-3">Riddhi Thummar</td>
+            <td class="px-4 py-3">riddhi@demo.com</td>
+            <td class="px-4 py-3"><span class="role-employee px-2 py-1 rounded-full text-sm">Employee</span></td>
+            <td class="px-4 py-3"><span class="status-active px-2 py-1 rounded-full text-sm">Active</span></td>
+            <td class="px-4 py-3">
+              <button class="btn-edit mr-2">Edit</button>
+              <button class="btn-delete">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="employeeModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2 class="text-xl font-bold mb-4" id="modalTitle">Add New Employee</h2>
+      <form id="employeeForm">
+        <input type="text" id="name" class="form-input" placeholder="Name" required>
+        <input type="email" id="email" class="form-input" placeholder="Email" required>
+        <select id="role" class="form-input" required>
+          <option value="">Select Role</option>
+          <option value="Employee">Employee</option>
+          <option value="Manager">Manager</option>
+        </select>
+        <select id="status" class="form-input" required>
+          <option value="">Select Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <div class="flex justify-end mt-4">
+          <button type="button" class="form-btn mr-2" id="cancelBtn">Cancel</button>
+          <button type="submit" class="form-btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("employeeModal");
+    const openModalBtn = document.getElementById("openModal");
+    const closeBtn = document.querySelector(".close");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const employeeForm = document.getElementById("employeeForm");
+    const employeeTableBody = document.getElementById("employeeTableBody");
+    const modalTitle = document.getElementById("modalTitle");
+
+    let editRow = null; // track row being edited
+
+    // Open modal for Add
+    openModalBtn.onclick = function() {
+      modal.style.display = "block";
+      modalTitle.innerText = "Add New Employee";
+      employeeForm.reset();
+      editRow = null;
+    }
+
+    // Close modal
+    closeBtn.onclick = cancelBtn.onclick = function() {
+      modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+      if (event.target == modal) modal.style.display = "none";
+    }
+
+    // Handle form submit
+    employeeForm.onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const role = document.getElementById("role").value;
+      const status = document.getElementById("status").value;
+
+      const roleClass = role === "Manager" ? "role-manager" : "role-employee";
+      const statusClass = status === "Inactive" ? "status-inactive" : "status-active";
+
+      if (editRow) {
+        // Update existing row
+        editRow.cells[0].innerText = name;
+        editRow.cells[1].innerText = email;
+        editRow.cells[2].innerHTML = `<span class="${roleClass} px-2 py-1 rounded-full text-sm">${role}</span>`;
+        editRow.cells[3].innerHTML = `<span class="${statusClass} px-2 py-1 rounded-full text-sm">${status}</span>`;
+      } else {
+        // Add new row
+        const newRow = document.createElement("tr");
+        newRow.innerHTML = `
+          <td class="px-4 py-3">${name}</td>
+          <td class="px-4 py-3">${email}</td>
+          <td class="px-4 py-3"><span class="${roleClass} px-2 py-1 rounded-full text-sm">${role}</span></td>
+          <td class="px-4 py-3"><span class="${statusClass} px-2 py-1 rounded-full text-sm">${status}</span></td>
+          <td class="px-4 py-3">
+            <button class="btn-edit mr-2">Edit</button>
+            <button class="btn-delete">Delete</button>
+          </td>
+        `;
+        employeeTableBody.appendChild(newRow);
+      }
+
+      attachRowEvents(); // rebind events
+      modal.style.display = "none";
+    }
+
+    // Attach events for Edit/Delete
+    function attachRowEvents() {
+      document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.onclick = function() {
+          if(confirm("Delete this employee?")) {
+            btn.closest("tr").remove();
+          }
+        }
+      });
+
+      document.querySelectorAll(".btn-edit").forEach(btn => {
+        btn.onclick = function() {
+          editRow = btn.closest("tr");
+          document.getElementById("name").value = editRow.cells[0].innerText;
+          document.getElementById("email").value = editRow.cells[1].innerText;
+          document.getElementById("role").value = editRow.cells[2].innerText;
+          document.getElementById("status").value = editRow.cells[3].innerText;
+          modalTitle.innerText = "Edit Employee";
+          modal.style.display = "block";
+        }
+
+      });
+    }
+
+    // Initial attach
+    attachRowEvents();
+  </script>
+
+</body>
+</html>
