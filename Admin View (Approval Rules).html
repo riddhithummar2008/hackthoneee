@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin View - Approval Rules</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Background Gradient Animation */
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #4c1d95, #16a34a);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Glass Container */
+    .container {
+      max-width: 1100px;
+      margin: 50px auto;
+      padding: 35px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(25px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      text-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-top: 20px;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], textarea, select, input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    select option {
+      background: #4c1d95;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: 2px solid #16a34a;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #16a34a;
+      cursor: pointer;
+    }
+
+    /* Approvers */
+    .approvers {
+      margin-top: 25px;
+    }
+
+    .approver-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .approver-item input[type="text"] {
+      flex: 1;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #16a34a, #4c1d95);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(22,163,52,0.4);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 0 25px #16a34a, 0 0 25px #4c1d95;
+    }
+
+    .btn-remove {
+      background: rgba(239,68,68,0.6);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+    }
+    .btn-remove:hover {
+      background: rgba(239,68,68,0.8);
+    }
+
+    .bottom-section {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .percent-input {
+      width: 100px;
+      text-align: center;
+    }
+
+    .save-btn {
+      background: linear-gradient(90deg,#4c1d95,#16a34a);
+      padding: 12px 30px;
+      border-radius: 10px;
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+    .save-btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 0 25px #16a34a, 0 0 25px #4c1d95;
+    }
+
+    .error {
+      border: 2px solid #ef4444 !important;
+    }
+
+    .message {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .success-text { color: #86efac; }
+    .error-text { color: #fca5a5; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Admin View (Approval Rules)</h1>
+
+    <label for="user">User</label>
+    <input type="text" id="user" placeholder="Enter username (e.g., Marc)" required>
+
+    <label for="description">Description about Rules</label>
+    <textarea id="description" rows="2" placeholder="Approval rule for miscellaneous expenses" required></textarea>
+
+    <label for="manager">Manager</label>
+    <select id="manager" required>
+      <option value="">Select Manager</option>
+      <option value="Sarah">Sarah</option>
+      <option value="Marc">Marc</option>
+      <option value="Riddhi">Riddhi</option>
+      <option value="John">John</option>
+      <option value="Priya">Priya</option>
+    </select>
+
+    <div class="checkbox">
+      <input type="checkbox" id="managerApprover">
+      <label for="managerApprover">Is Manager an Approver?</label>
+    </div>
+
+    <div class="approvers">
+      <label>Approvers</label>
+      <div id="approverList">
+        <div class="approver-item">
+          <input type="text" placeholder="Approver Name" required>
+          <input type="checkbox" title="Required approver">
+          <button class="btn-remove">X</button>
+        </div>
+      </div>
+      <button class="btn" id="addApprover">+ Add Approver</button>
+    </div>
+
+    <div class="checkbox">
+      <input type="checkbox" id="approverSequence">
+      <label for="approverSequence">Approvers Sequence</label>
+    </div>
+
+    <div class="bottom-section">
+      <div>
+        <label for="minApproval">Minimum Approval Percentage</label>
+        <input type="number" id="minApproval" class="percent-input" placeholder="%" min="1" max="100" required>
+      </div>
+      <button class="save-btn" id="saveRules">Save Rules</button>
+    </div>
+
+    <p id="messageBox" class="message"></p>
+  </div>
+
+  <script>
+    const approverList = document.getElementById('approverList');
+    const addApproverBtn = document.getElementById('addApprover');
+    const saveBtn = document.getElementById('saveRules');
+    const messageBox = document.getElementById('messageBox');
+
+    // Add new approver
+    addApproverBtn.onclick = () => {
+      const div = document.createElement('div');
+      div.classList.add('approver-item');
+      div.innerHTML = `
+        <input type="text" placeholder="Approver Name" required>
+        <input type="checkbox" title="Required approver">
+        <button class="btn-remove">X</button>
+      `;
+      approverList.appendChild(div);
+      attachRemoveEvents();
+    };
+
+    function attachRemoveEvents() {
+      document.querySelectorAll('.btn-remove').forEach(btn => {
+        btn.onclick = () => btn.parentElement.remove();
+      });
+    }
+    attachRemoveEvents();
+
+    // Save Validation
+    saveBtn.onclick = () => {
+      messageBox.innerHTML = "";
+      messageBox.className = "message";
+
+      const user = document.getElementById('user');
+      const description = document.getElementById('description');
+      const manager = document.getElementById('manager');
+      const minApproval = document.getElementById('minApproval');
+
+      [user, description, manager, minApproval].forEach(f => f.classList.remove('error'));
+
+      if (!user.value.trim() || !description.value.trim() || !manager.value || !minApproval.value) {
+        messageBox.innerHTML = "⚠️ Please fill all required fields properly.";
+        messageBox.classList.add("error-text");
+        [user, description, manager, minApproval].forEach(f => {
+          if (!f.value.trim()) f.classList.add('error');
+        });
+        return;
+      }
+
+      const approvers = [...document.querySelectorAll('.approver-item input[type="text"]')]
+        .map(i => i.value.trim()).filter(v => v);
+      if (approvers.length === 0) {
+        messageBox.innerHTML = "⚠️ Add at least one valid approver.";
+        messageBox.classList.add("error-text");
+        return;
+      }
+
+      // Success
+      messageBox.innerHTML = "✅ Approval rules saved successfully!";
+      messageBox.classList.add("success-text");
+
+      const data = {
+        user: user.value,
+        description: description.value,
+        manager: manager.value,
+        managerApprover: document.getElementById('managerApprover').checked,
+        approvers,
+        sequence: document.getElementById('approverSequence').checked,
+        minApproval: minApproval.value
+      };
+      localStorage.setItem('approvalRules', JSON.stringify(data));
+    };
+  </script>
+
+</body>
+</html>
