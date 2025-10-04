@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee View - Odoo Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body {
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:linear-gradient(135deg,#4c1d95,#16a34a);
+  background-size:400% 400%;
+  animation:gradientShift 15s ease infinite;
+  min-height:100vh;
+  color:#fff;
+}
+@keyframes gradientShift {
+  0% {background-position:0% 50%;}
+  50% {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+
+/* Container */
+.container {
+  position:relative;
+  max-width:1100px;
+  margin:60px auto;
+  padding:30px;
+  background:rgba(255,255,255,0.1);
+  backdrop-filter:blur(25px);
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.2);
+  box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}
+
+/* Header */
+.header {
+  text-align:center;
+  margin-bottom:30px;
+}
+.header h1 {
+  font-size:32px;
+  margin-bottom:8px;
+  text-shadow:0 0 10px rgba(0,0,0,0.3);
+}
+.header p {
+  color:rgba(255,255,255,0.8);
+  font-size:14px;
+}
+
+/* Buttons */
+.actions {
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  margin-bottom:25px;
+}
+.actions button {
+  padding:12px 28px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(90deg,#16a34a,#4c1d95);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  font-size:15px;
+  transition:all 0.3s ease;
+  box-shadow:0 0 20px rgba(22,163,52,0.4);
+}
+.actions button:hover {
+  transform:translateY(-3px) scale(1.05);
+  box-shadow:0 0 30px #16a34a, 0 0 35px #4c1d95;
+}
+
+/* Summary Flow */
+.flow {
+  margin:25px 0;
+  position:relative;
+  text-align:center;
+}
+.flow-line {
+  border-top:2px dotted #f87171;
+  width:80%;
+  margin:20px auto;
+}
+.flow p {
+  margin-top:8px;
+  font-size:14px;
+  color:rgba(255,255,255,0.8);
+}
+
+/* Expense Table */
+.table-container {
+  overflow-x:auto;
+}
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:rgba(255,255,255,0.05);
+  border-radius:12px;
+  overflow:hidden;
+}
+th, td {
+  padding:14px;
+  text-align:left;
+  font-size:14px;
+}
+th {
+  background:rgba(255,255,255,0.15);
+  font-weight:600;
+}
+tr {
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+tr:hover {
+  background:rgba(255,255,255,0.1);
+}
+
+/* Status Badges */
+.status {
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:12px;
+  font-weight:600;
+  font-size:12px;
+}
+.draft {background:rgba(239,68,68,0.3); border:1px solid rgba(239,68,68,0.6);}
+.submitted {background:rgba(37,99,235,0.3); border:1px solid rgba(37,99,235,0.6);}
+.approved {background:rgba(34,197,94,0.3); border:1px solid rgba(34,197,94,0.6);}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Employee’s View</h1>
+    <p>Upload or add new expenses. View your receipts and approval status here.</p>
+  </div>
+
+  <div class="actions">
+    <button onclick="document.getElementById('fileInput').click()">Upload</button>
+    <button onclick="openNewExpense()">New</button>
+    <input type="file" id="fileInput" style="display:none" onchange="handleFileUpload(event)">
+  </div>
+
+  <div class="flow">
+    <div><strong>5467 rs → 3367 rs → 500 rs (Approved)</strong></div>
+    <div class="flow-line"></div>
+    <p>Expenses are submitted by employee but approved according to company rules.</p>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Description</th>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Paid By</th>
+          <th>Remarks</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="expenseTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// Sample expense data
+const expenses = [
+  {employee:"Sarah", desc:"Restaurant bill", date:"4th Oct, 2025", cat:"Food", paid:"Sarah", remarks:"Client lunch", amt:"5000 rs", status:"Draft"},
+  {employee:"Sarah", desc:"Taxi ride", date:"5th Oct, 2025", cat:"Travel", paid:"Sarah", remarks:"Airport drop", amt:"1200 rs", status:"Submitted"},
+  {employee:"Sarah", desc:"Stationery", date:"6th Oct, 2025", cat:"Office", paid:"Sarah", remarks:"Pens & notebooks", amt:"500 rs", status:"Approved"}
+];
+
+const tableBody = document.getElementById('expenseTable');
+expenses.forEach(e=>{
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${e.employee}</td>
+    <td>${e.desc}</td>
+    <td>${e.date}</td>
+    <td>${e.cat}</td>
+    <td>${e.paid}</td>
+    <td>${e.remarks}</td>
+    <td>${e.amt}</td>
+    <td><span class="status ${e.status.toLowerCase()}">${e.status}</span></td>
+  `;
+  tableBody.appendChild(row);
+});
+
+// File upload function
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    alert("File uploaded: " + file.name);
+  }
+}
+
+// Open expense receipt page (the uploaded one)
+function openNewExpense() {
+  window.open("hk html.html");
+}
+</script>
+</body>
+</html>
